@@ -31,7 +31,7 @@ def f(x):
 
 # régularisation
 def R(x):
-    return np.linalg.norm(x-z, ord=1)
+    return np.linalg.norm(x, ord=1)
 
 # fonction de coût globale
 def E(x,lam):
@@ -39,28 +39,18 @@ def E(x,lam):
 
 
 # fonction prox norme 1
-def prox(xn,gamma):
-    x = np.zeros((len(xn),len(xn)),float) * np.nan
-    for i in range(len(xn)):
-        for j in range(len(xn)):
-            if xn[i][j] >= gamma:
-                x[i][j] = xn[i][j] - gamma
-            elif xn[i][j] <= -gamma:
-                x[i][j] = xn[i][j] + gamma
-            else:
-                x[i][j] = 0
-    return x
+def prox(x,gamma,lam):
+    return np.maximum(x-lam*gamma , np.minimum(0 , x+lam*gamma))
+    # retourne la fonction du prox à l'aide du min-max
 
 
 # ALGORITHME
 # paramètres du modèle
-# lam = 5.5
+lam = 0.01
 # lip = 2*opNorm(H,Ht,'1D')**2 + 2*lam*opNorm(D,Dt,'1D')**2
 # taux = 0.9/lip
-gamma = 0.7
-taux = 0.1
+gamma = 0.4
 print(gamma)
-print(taux)
 
 # paramètres de l'algo
 Niter = 1000                                 # nombre max d'itérations
@@ -71,9 +61,9 @@ xn = np.random.randn(len(xbar),len(xbar))									# x0
 
 # itérations
 for i in range(1,Niter):
-    xn = prox(xn - 2*gamma*(xn-z),taux)
+    xn = prox(xn - 2*gamma*(xn-z),gamma,lam)
 
-    En[i] = E(xn,taux)
+    En[i] = E(xn,lam)
     
 xhat = xn
 
